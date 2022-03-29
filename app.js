@@ -3,7 +3,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
-const _ = require('lodash');
+const _ = require("lodash");
 
 //console.log(date());
 
@@ -16,9 +16,12 @@ app.use(express.static("public"));
 
 //db connection
 
-mongoose.connect("mongodb://localhost:27017/todolistDB", {
-  useNewUrlParser: true,
-});
+mongoose.connect(
+  "mongodb+srv://admin-sachin:Sharma321@cluster0.fiomt.mongodb.net/todolistDB",
+  {
+    useNewUrlParser: true,
+  }
+);
 
 //db schema
 
@@ -82,26 +85,27 @@ app.get("/:customListName", function (req, res) {
       } else {
         // Show existing list
 
-
-        res.render("list", {listTitle: foundList.name, newListItems: foundList.items});
+        res.render("list", {
+          listTitle: foundList.name,
+          newListItems: foundList.items,
+        });
       }
     }
   });
 });
 
 app.post("/", function (req, res) {
-
   const itemName = req.body.newItem;
   const listName = req.body.list;
 
   const item = new Item({
     name: itemName,
   });
-  if(listName === "Today"){
+  if (listName === "Today") {
     item.save();
     res.redirect("/");
-  }else{
-    List.findOne({name: listName}, function(err, foundList){
+  } else {
+    List.findOne({ name: listName }, function (err, foundList) {
       foundList.items.push(item);
       foundList.save();
       res.redirect("/" + listName);
@@ -113,7 +117,7 @@ app.post("/delete", (req, res) => {
   const checkedItemId = req.body.checkbox;
   const listName = req.body.listName;
 
-  if(listName === "Today"){
+  if (listName === "Today") {
     Item.findByIdAndRemove(checkedItem, (err) => {
       if (err) {
         console.log(err);
@@ -122,12 +126,16 @@ app.post("/delete", (req, res) => {
         res.redirect("/");
       }
     });
-  }else{
-    List.findOneAndUpdate({name: listName}, {$pull: {items: {_id: checkedItemId}}}, function(err, foundList){
-      if(!err){
-        res.redirect("/" + listName);
+  } else {
+    List.findOneAndUpdate(
+      { name: listName },
+      { $pull: { items: { _id: checkedItemId } } },
+      function (err, foundList) {
+        if (!err) {
+          res.redirect("/" + listName);
+        }
       }
-    });
+    );
   }
 });
 
@@ -135,6 +143,13 @@ app.get("/about", function (req, res) {
   res.render("about");
 });
 
-app.listen(3000, function () {
+
+let port = process.env.PORT;
+if(port == null || port == "") {
+  port = 3000;
+}
+app.listen(port);
+
+app.listen(port, function () {
   console.log("server has been started...");
 });
